@@ -223,7 +223,11 @@ dir_remove (struct dir *dir, const char *name)
 
   /* Don't allow . or .. to be removed */
 
-  // ADD CODE HERE
+  if (strcmp(name, ".") == 0)
+    return false;
+
+  if (strcmp(name, "..") == 0)
+    return false;
 
   /* Find directory entry. */
   inode_lock (dir->inode);
@@ -237,7 +241,33 @@ dir_remove (struct dir *dir, const char *name)
 
   /* Verify that it is not an in-use or non-empty directory. */
 
-  // ADD CODE HERE
+  if (inode_get_type(inode) == DIR_INODE)
+  {
+    // Open directory
+    struct dir *target = dir_open(inode);
+    char dummy[NAME_MAX + 1];
+
+    // If we are able to read, then the dir is not empty
+    if (!dir_readdir(target, dummy))
+    {
+      dir_close(target);
+      goto done;
+    }
+
+    // Check if any directory members are in-use
+    struct dir_entry e;
+    off_t ofs;
+    for (ofs = sizeof(e); inode_read_at(target->inode, &e, sizeof(e), ofs) == sizeof(e); ofs += sizeof(e))
+      {
+        if (e.in_use)
+        {
+          dir_close(target);
+          goto done;
+        }
+      }
+
+    dir_close(target);
+  }
 
   /* Erase directory entry. */
   e.in_use = false;
