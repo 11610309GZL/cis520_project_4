@@ -609,11 +609,7 @@ sys_munmap (int mapping)
 static int
 sys_chdir (const char *udir) 
 {
-  bool ok = false;
-
-  // ADD CODE HERE
-
-  return ok;
+  return filesys_chdir(udir);
 }
 
 /* Mkdir system call. */
