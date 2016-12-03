@@ -32,9 +32,14 @@ None
 >> A2: What is the maximum size of a file supported by the inode
 >> structure?  Show your work.
 
-inode_disk in inode create must be equal to BLOCK_SECTOR_SIZE to pass assertions.
-BLOCK_SECTOR_SIZE is defined as 512 bytes. We have 125 sectors possible, 
-so 512 * 125 = 64,000 bytes
+BLOCK_SECTOR_SIZE is defined as 512 bytes. We have 123 direct blocks, 1
+indirect block, and 1 doubly indirect block:
+
+123 Direct Blocks                                     = 123 * 512 bytes       =    62,976
+1 indirect block points to 128 direct blocks          = 128 * 512 bytes       =    65,536
+1 doubly indirect block points to 128 indirect blocks = 128 * 128 * 512 bytes = 8,388,608
+                                                      -----------------------------------
+									                           For a total of:  8,517,120 bytes = 8 MB
 
 ---- DIRECTORIES and SUBDIRECTORIES ----
 
@@ -43,8 +48,25 @@ so 512 * 125 = 64,000 bytes
 >> should succeed, as should only one of two simultaneous attempts to
 >> create a file with the same name, and so on.
 
+There is a lock around all inode access:
+
+To create a file, the directory's (in which the file is to be created) inode
+is locked prior to adding the new file. During the add, it looks up the desired
+name to ensure a file with that name doesn't already exist. This ensures atomic
+file creation within a directory.
+
+To remove a file from a directory, a similar file name lookup is performed
+after acquiring the directory's lock. This ensure's atomic file removal within
+a directory.
+
 >> A4: Does your implementation allow a directory to be removed if it
 >> is open by a process or if it is in use as a process's current
 >> working directory?  If so, what happens to that process's future
 >> file system operations?  If not, how do you prevent it?
 
+We do not. During the removal process, we open the inode, and check if
+if it's access count is greater than 1 (since we opened it). If it's greater
+than one, we know the inode is in use by someone else and we do not proceed
+with removing the directory. Since a process always has its cwd open while
+executing, we can be sure that the cwd is not being removed using the same
+check described above.
