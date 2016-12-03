@@ -1,0 +1,50 @@
+		           +---------------------------+
+       	           |         CIS 520           |
+		           | PROJECT 4: File System    |
+		           |     DESIGN DOCUMENT       |
+		           +---------------------------+
+
+---- GROUP ----
+
+>> Fill in the names of your group members.
+
+Nolan Casimir
+Alex Hamilton
+Dalton Graber
+
+---- PRELIMINARIES ----
+
+>> If you have any preliminary comments on your submission, notes for the
+>> TAs, or extra credit, please give them here.
+
+>> Please cite any offline or online sources you consulted while
+>> preparing your submission, other than the Pintos documentation, course
+>> text, lecture notes, and course staff.
+
+---- DATA STRUCTURES ----
+
+>> A1: Copy here the declaration of each new or changed `struct' or
+>> `struct' member, global or static variable, `typedef', or
+>> enumeration.  Identify the purpose of each in 25 words or less.
+
+None
+
+>> A2: What is the maximum size of a file supported by the inode
+>> structure?  Show your work.
+
+inode_disk in inode create must be equal to BLOCK_SECTOR_SIZE to pass assertions.
+BLOCK_SECTOR_SIZE is defined as 512 bytes. We have 125 sectors possible, 
+so 512 * 125 = 64,000 bytes
+
+---- DIRECTORIES and SUBDIRECTORIES ----
+
+>> A3: How do you prevent races on directory entries?  For example,
+>> only one of two simultaneous attempts to remove a single file
+>> should succeed, as should only one of two simultaneous attempts to
+>> create a file with the same name, and so on.
+
+>> A4: Does your implementation allow a directory to be removed if it
+>> is open by a process or if it is in use as a process's current
+>> working directory?  If so, what happens to that process's future
+>> file system operations?  If not, how do you prevent it?
+
